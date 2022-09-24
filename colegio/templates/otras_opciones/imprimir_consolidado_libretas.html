@@ -1,0 +1,76 @@
+{% extends 'base/home_newtemplate.html' %}
+{% block title %}Consolidado Libretas{% endblock title %}
+{% block active_oo %} active {% endblock%}
+{% block form %}
+<h4 align="CENTER">CONSOLIDADO LIBRETA DE NOTAS</h4>
+<form method='POST' if="formConsolidado">{%csrf_token%}
+<div class="row">
+		<div class="col-md-6">
+			<label>Seleccione Año</label>
+			<select class="single-select" name="ano">
+				{% for a in aac %}
+					<option value="{{a.Ano}}">{{ a.Ano}}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="col-md-6">
+			<label>Seleccione Bimestre</label>
+			<select class="single-select" name="pacademico">
+				{% for p in pac %}
+					<option value="{{p.id}}">{{ p.Nombre}}</option>
+				{% endfor %}
+			</select>
+			<br>	
+		</div>
+    	<div class="col-md-6">
+			<label for="exampleSelect1">Seleccione GradoNivel</label>
+      		<select class="single-select" name="Grado">
+	        	<option value="1PRIM">1PRIM</option>
+		        <option value="2PRIM">2PRIM</option>
+		        <option value="3PRIM">3PRIM</option>
+		        <option value="4PRIM">4PRIM</option>
+		        <option value="5PRIM">5PRIM</option>
+		        <option value="6PRIM">6PRIM</option>
+		        <option value="1SEC">1SEC</option>
+		        <option value="2SEC">2SEC</option>
+		        <option value="3SEC">3SEC</option>
+		        <option value="4SEC">4SEC</option>
+		        <option value="5SEC">5SEC</option>
+      		</select>
+      	</div>
+      	<div class="col-md-6">
+			<label for="exampleSelect1">Seleccione Sección</label>
+      		<select class="single-select" name="Seccion">
+	        	<option value="A">A</option>
+		        <option value="B">B</option>
+		        <option value="C">C</option>
+		        <option value="D">D</option>
+		        <option value="E">E</option>
+		        <option value="F">F</option>
+		        <option value="G">G</option>
+      		</select>
+      	</div>
+		  <input type="number" name="final" id="finalid" hidden>
+			<div class="row">
+				<div class="col-6" style="text-align: center;">
+					<br>
+					  <button class="btn btn-outline-success" onclick="tipo_envio(1);">Descargar Consolidado Competencias</button>
+				</div>
+				<div class="col-6" style="text-align: center;">
+					<br>
+					  <button class="btn btn-outline-success" onclick="tipo_envio(0);">Descargar Consolidado Solo Promedio</button>
+				</div>
+			</div>
+</form>
+
+
+<script>
+	function tipo_envio(num) {
+		document.getElementById("finalid").value=num;
+
+	}
+</script>
+</div>
+
+{% endblock %}
+

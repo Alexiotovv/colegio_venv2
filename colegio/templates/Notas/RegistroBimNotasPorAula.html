@@ -1,0 +1,179 @@
+{% extends 'base/home_newtemplate.html' %}
+{% block title %}Registro Notas por Aula{% endblock title %}
+{% block form %}
+<!-- <script src="/static/vueNotas/vueNotas.js"></script> -->
+
+<div class="row row-cols-12 row-cols-md-12 row-cols-lg-12 row-cols-xl-12">
+    <div class="col">
+        <h6 class="mb-0 text-uppercase">Registro de Notas por Aula</h6>
+        <hr />
+        <div class="card">
+            <div class="card-body">
+                <form id="formConsulta">{%csrf_token%}
+                    <div class="row">
+                        <div class="col-2">
+                            <label for="">GradoNivel</label>
+                            <select id="GradoNivel" class="form-select form-select-sm mb-3" name="GradoNivel">
+                                <option value="--">--</option>
+                                <option value="1PRIM">1PRIM</option>
+                                <option value="2PRIM">2PRIM</option>
+                                <option value="3PRIM">3PRIM</option>
+                                <option value="4PRIM">4PRIM</option>
+                                <option value="5PRIM">5PRIM</option>
+                                <option value="6PRIM">6PRIM</option>
+                                <option value="1SEC">1SEC</option>
+                                <option value="2SEC">2SEC</option>
+                                <option value="3SEC">3SEC</option>
+                                <option value="4SEC">4SEC</option>
+                                <option value="5SEC">5SEC</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <label for="">Curso</label>
+                            <select name="Cursos" id="Cursos" class="form-select form-select-sm mb3" disabled>
+                                <option value="--">--</option>
+                            </select>
+                        </div>
+                        <div class="col-2">
+                            <label for="" >Sección</label>
+                            <select class="form-select form-select-sm mb-3" id="Seccion" name="Seccion" disabled>
+                                <option value="--">--</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <label for="">Periodo Académico</label>
+                            <select class="form-select form-select-sm mb-3" id="PeriodoAcademico" name="PeriodoAcademico" disabled>
+                                {% for p in paca %}
+                                    {% if p.Status == 'Activo' %}
+                                        <option selected value="{{ob.id}}">{{p.Nombre}}</option>        
+                                    {% else %}
+                                        <option value="{{ob.id}}">{{p.Nombre}}</option>        
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-2">
+                            <label for="">Ano Academico</label>
+                            <select name="AnoAcademico" id="AnoAcademico" class="form-select form-select-sm mb-3" disabled>
+                                <option value="{{ano.id}}">{{ano.Ano}}</option>
+                            </select>
+                        </div>
+                        
+                    </div>
+                </form>
+
+
+                <div class="row">
+                    <table id="Alumnos" class="table table-striped table-bordered" >
+                        <thead>
+                            <tr>
+                                <th>id</th>
+                                <th>Nombres</th>
+                            </tr>  
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% endblock %}
+
+    {% block js1 %}
+    <!-- script para edicion -->
+    <script>
+        $("#PeriodoAcademico").change(function(){
+            ObtenerAlumnos();
+            ObtenerCompetencias();
+        });
+
+        $("#Seccion").change(function(){
+            $("#PeriodoAcademico").removeAttr('disabled')
+        });
+
+        $("#Cursos").change(function(){
+            $("#Seccion").removeAttr('disabled')
+            
+        });
+
+        $("#GradoNivel").change(function(){
+            $("#Cursos").removeAttr('disabled')
+            nivel=($("#GradoNivel option:selected").text()).substr(($("#GradoNivel option:selected").text().length)-9,4);
+            if (nivel !=='PRIM') {
+                nivel='SEC';
+            }
+
+            $.ajax({
+                type: "GET",
+                url: "/notas/ObtenerCursosBimPorAula/"+nivel,
+                dataType: "json",
+                success: function (response) {
+                    $("#Cursos").empty();
+                    $("#Cursos").append('<option value=-->--</option>');
+                    $.each(response, function (key, item){
+                        $("#Cursos").append('<option value="' + item.id + '">' + item.Nivel +"-"+ item.Nombre + '</option>');
+                    });                    
+                }
+            });
+
+
+        });
+
+        function ObtenerCompetencias(){
+            $.ajax({
+                type: "GET",
+                url: "ObtenerCompetenciasBimPorAula/"+$("#Cursos").val(),
+                dataType: "json",
+                success: function (response) {
+                    // console.log(response);
+                    $("#Alumnos thead").html("");
+                    $.each(response,function (index, element) {
+                        $("thead").append('<tr>\
+                            <th>'+ element.id+'</th>\
+                            <th>'+ element.Competencias__nombre_competencia +'</th>\
+                        </tr>')
+
+                    });
+                }
+            });
+        }
+
+        function ObtenerAlumnos(){
+            $("#AnoAcademico").removeAttr('disabled');
+            $("#Seccion").removeAttr('disabled');
+            var serializedData=$("#formConsulta").serialize();
+            $.ajax({
+                type: "POST",
+                data:serializedData,
+                url: "AlumnosBimPorAula",
+                dataType: "json",
+                success: function (response) {
+                    $("#Alumnos tbody").html("");
+                    $.each(response,function (index, element) {
+                        $("tbody").append('<tr>\
+                            <td>'+ element.id+'</td>\
+                            <td>'+ element.Alumno__ApellidoPaterno +' '+ element.Alumno__ApellidoMaterno +', '+ element.Alumno__Nombres +'</td>\
+                        </tr>')
+                    });
+                }
+            });
+            $("#AnoAcademico").prop('disabled',true);
+        }
+        
+    </script>
+    <!-- cierra script para edición -->
+    <script>
+    </script>
+    <script>
+    </script>
+    {% endblock %}

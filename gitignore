@@ -1,0 +1,14 @@
+.vscode
+/Lib
+/Scripts
+pyvenv.cfg
+
+/colegio/static
+/colegio/staticfiles
+/colegio/manage.py
+/colegio/__pycache__
+/colegio/init.py
+/colegio/settings.py
+/colegio/urls.py
+/colegio/wsgi.py
+
